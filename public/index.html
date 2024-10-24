@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload and Label Detection</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to the CSS file -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center elements horizontally */
+            justify-content: center; /* Center elements vertically */
+            height: 100vh; /* Full viewport height */
+            margin: 0; /* Remove default margin */
+            background-color: #f9f9f9; /* Light background color */
+        }
+
+        h1, h2 {
+            margin: 10px 0; /* Space around headings */
+            text-align: center; /* Center the text */
+        }
+
+        input[type="file"] {
+            margin: 20px 0; /* Space around file input */
+        }
+
+        button {
+            padding: 10px 20px; /* Padding for button */
+            background-color: #4CAF50; /* Green background */
+            color: white; /* White text */
+            border: none; /* No border */
+            border-radius: 5px; /* Rounded corners */
+            cursor: pointer; /* Pointer cursor on hover */
+        }
+
+        button:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+
+        .labels-box {
+            margin-top: 20px; /* Space above labels box */
+            padding: 20px; /* Padding inside the box */
+            border: 2px solid #4CAF50; /* Border color */
+            border-radius: 5px; /* Rounded corners */
+            background-color: #fff; /* White background */
+            display: none; /* Hide initially */
+            width: 300px; /* Fixed width */
+            text-align: center; /* Center text inside the box */
+        }
+
+        ul {
+            list-style-type: none; /* Remove bullet points */
+            padding: 0; /* Remove default padding */
+        }
+
+        li {
+            margin: 5px 0; /* Space between list items */
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload an Image for Label Detection</h1>
+    <input type="file" id="imageInput" accept="image/jpeg, image/png" />
+    <button id="uploadButton">Upload</button>
+
+    <div id="labelsContainer" class="labels-box"> <!-- Container for labels -->
+        <h2>Labels:</h2>
+        <ul id="labelsList"></ul>
+    </div>
+
+    <script>
+        document.getElementById('uploadButton').addEventListener('click', async () => {
+            const fileInput = document.getElementById('imageInput');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('Please select an image to upload.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                displayLabels(data.labels);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
+        function displayLabels(labels) {
+            const labelsContainer = document.getElementById('labelsContainer');
+            const labelsList = document.getElementById('labelsList');
+            labelsList.innerHTML = '';
+
+            labels.forEach(label => {
+                const listItem = document.createElement('li');
+                listItem.textContent = label;
+                labelsList.appendChild(listItem);
+            });
+
+            labelsContainer.style.display = 'block'; // Show the labels box
+        }
+    </script>
+</body>
+</html>
+
